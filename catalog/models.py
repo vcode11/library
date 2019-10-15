@@ -69,6 +69,7 @@ class BookInstance(models.Model):
                            help_text='Unique id across whole library for this book.')
      book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
      due_back = models.DateField(null=True, blank=True,)
+     shelf = models.CharField(max_length=200, null=True, blank=True)
 
      LOAN_STATUS = (
          ('m', 'Maintenance'),
