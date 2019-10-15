@@ -25,12 +25,14 @@ class Author(models.Model):
     
     def __str__(self):
         """String for representing the model object."""
-        return f'{self.last_name}, {self.first_name}'
+        return f'{self.first_name}, {self.last_name}'
+
+
 class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
     #To Do many to many relationship in authors and books
-    author  = models.ForeignKey(Author, on_delete=models.SET_NULL, null=True)
+    author  = models.ManyToManyField(Author, help_text='Add a author', blank=True)
     summary = models.TextField(max_length=500, 
                                help_text="Enter a brief description", 
                                null=True, blank= True,)
@@ -47,8 +49,19 @@ class Book(models.Model):
 
     def get_absolute_url(self):
         """ URL for a book """
-        pass
-        #return reverse('book-detail', args=[str(self.id)])
+        return reverse('book-detail', args=[str(self.id)])
+    
+    def display_genre(self):
+        """ Create a string to display in genre in admin site """
+        return ', '.join(genre.name for genre in self.genre.all()[:3])
+    
+    def display_author(self):
+        """ Create a string to display authors in admin site """
+        return ', '.join(author.first_name + ' ' + author.last_name for author in  self.author.all()[:3])
+    
+    display_genre.short_description = 'Genre'
+    display_author.short_description = 'Author'
+
 class BookInstance(models.Model):
      """ Model representing a specific copy of book that can be borrowed """
      id = models.UUIDField(primary_key=True, 
@@ -76,7 +89,7 @@ class BookInstance(models.Model):
     
      def __str__(self):
         """ String representation for the model object. """
-        return f'{self.id} {self.book.title}'
+        return f'{self.book.title} {str(self.id)[:15]}'
 
 
     
