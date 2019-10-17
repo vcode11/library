@@ -3,6 +3,11 @@ from django.db import models
 from django.urls import reverse
 import uuid # Required for uniqure book instances
 
+class Shelf(models.Model):
+    """ Model representing a shelf in library """
+    name = models.CharField(max_length=200, help_text='Enter the name of shelf')
+
+
 class Genre(models.Model):
     """ Model for representing a book genre """
     name = models.CharField(max_length=200, help_text='Enter a book genre Ex: Fiction')
@@ -31,8 +36,8 @@ class Author(models.Model):
 class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
-    #To Do many to many relationship in authors and books
-    author  = models.ManyToManyField(Author, help_text='Add a author', blank=True)
+    author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='books')
+    number_of_copies = models.IntegerField(default=1)
     summary = models.TextField(max_length=500, 
                                help_text="Enter a brief description", 
                                null=True, blank= True,)
@@ -41,8 +46,9 @@ class Book(models.Model):
                             help_text='13 Character <a href="https://www.isbn-'
                                       'international.org/content/what-isbn">ISBN number</a>',
                             null=True, blank=True)
-    genre = models.ManyToManyField(Genre, help_text='Choose a genre for this book.')
-
+    genre = models.ManyToManyField(Genre, help_text='Choose a genre for this book.',related_name='books')
+    book_shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True,related_name='books')
+    initialized = models.BooleanField(default=False)
     def __str__(self):
         """ String representation of model book """
         return self.title
@@ -57,7 +63,7 @@ class Book(models.Model):
     
     def display_author(self):
         """ Create a string to display authors in admin site """
-        return ', '.join(author.first_name + ' ' + author.last_name for author in  self.author.all()[:3])
+        return ', '.join(str(author.first_name) + ' ' + str(author.last_name) for author in  self.author.all()[:3])
     
     display_genre.short_description = 'Genre'
     display_author.short_description = 'Author'
@@ -82,15 +88,18 @@ class BookInstance(models.Model):
          max_length = 1,
          choices = LOAN_STATUS,
          blank=True,
-         default='m',
+         default='a',
          help_text='Book Availability',
      )
      class Meta:
          ordering =['due_back']
+         verbose_name_plural = 'Book Copies'
+         verbose_name = 'List of All Copies'
     
      def __str__(self):
         """ String representation for the model object. """
         return f'{self.book.title} {str(self.id)[:15]}'
+
 
 
     
