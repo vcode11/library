@@ -37,7 +37,7 @@ class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
     author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='books')
-    number_of_copies = models.IntegerField(default=1)
+    number_of_copies = models.IntegerField(default=0,help_text='Number of copies of this book. Readonly Field')
     summary = models.TextField(max_length=500, 
                                help_text="Enter a brief description", 
                                null=True, blank= True,)
@@ -48,7 +48,7 @@ class Book(models.Model):
                             null=True, blank=True)
     genre = models.ManyToManyField(Genre, help_text='Choose a genre for this book.',related_name='books')
     book_shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True,related_name='books')
-    initialized = models.BooleanField(default=False)
+    
     def __str__(self):
         """ String representation of model book """
         return self.title
@@ -70,10 +70,10 @@ class Book(models.Model):
 
 class BookInstance(models.Model):
      """ Model representing a specific copy of book that can be borrowed """
-     id = models.UUIDField(primary_key=True, 
-                           default=uuid.uuid4,
+     id = models.CharField(primary_key=True, 
+                           max_length=250,
                            help_text='Unique id across whole library for this book.')
-     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True)
+     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, related_name='copies')
      due_back = models.DateField(null=True, blank=True,)
      shelf = models.CharField(max_length=200, null=True, blank=True)
 
@@ -94,12 +94,11 @@ class BookInstance(models.Model):
      class Meta:
          ordering =['due_back']
          verbose_name_plural = 'Book Copies'
-         verbose_name = 'List of All Copies'
+         verbose_name = 'Copy'
     
      def __str__(self):
         """ String representation for the model object. """
         return f'{self.book.title} {str(self.id)[:15]}'
-
 
 
     
