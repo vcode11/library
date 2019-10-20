@@ -1,8 +1,8 @@
 #-*- coding: utf-8 -*-
 from django.contrib import admin
 from .models import Author, Genre, Book, BookInstance, Shelf
-
-
+from django.core.exceptions import ValidationError
+from .forms import BookInstanceAdminForm
 admin.site.register(Shelf)
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
@@ -25,6 +25,7 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(BookInstance)
 class BookInstanceAdmin(admin.ModelAdmin):
+    form = BookInstanceAdminForm
     list_display = ('book', 'status', 'due_back')
     list_filter = ('status', 'due_back')
     search_fields = ('book', 'id')

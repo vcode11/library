@@ -1,11 +1,15 @@
 #-*- coding: utf-8 -*-
 from django.db import models
 from django.urls import reverse
-import uuid # Required for uniqure book instances
+from django.contrib.auth.models import User
+
 
 class Shelf(models.Model):
     """ Model representing a shelf in library """
     name = models.CharField(max_length=200, help_text='Enter the name of shelf')
+
+    def __str__(self):
+        return str(self.name)
 
 
 class Genre(models.Model):
@@ -37,7 +41,6 @@ class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
     author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='books')
-    number_of_copies = models.IntegerField(default=0,help_text='Number of copies of this book. Readonly Field')
     summary = models.TextField(max_length=500, 
                                help_text="Enter a brief description", 
                                null=True, blank= True,)
@@ -47,7 +50,6 @@ class Book(models.Model):
                                       'international.org/content/what-isbn">ISBN number</a>',
                             null=True, blank=True)
     genre = models.ManyToManyField(Genre, help_text='Choose a genre for this book.',related_name='books')
-    book_shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True,related_name='books')
     
     def __str__(self):
         """ String representation of model book """
@@ -73,16 +75,18 @@ class BookInstance(models.Model):
      id = models.CharField(primary_key=True, 
                            max_length=250,
                            help_text='Unique id across whole library for this book.')
-     book = models.ForeignKey(Book, on_delete=models.SET_NULL, null=True, related_name='copies')
+     book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='copies')
      due_back = models.DateField(null=True, blank=True,)
-     shelf = models.CharField(max_length=200, null=True, blank=True)
-
+     shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
+     issued_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
+          
      LOAN_STATUS = (
          ('m', 'Maintenance'),
          ('o', 'On Loan'),
          ('a', 'Available'),
          ('r', 'Reserved'),
          ('l', 'Lost'),
+         ('d', 'Due'),
      )
      status = models.CharField(
          max_length = 1,
@@ -99,6 +103,8 @@ class BookInstance(models.Model):
      def __str__(self):
         """ String representation for the model object. """
         return f'{self.book.title} {str(self.id)[:15]}'
+
+
 
 
     
