@@ -9,9 +9,10 @@ class BookInstanceAdminForm(forms.ModelForm):
         cleaned_data = super().clean()
         issued_to = cleaned_data['issued_to']
         status = cleaned_data['status']
-        print(status)
         #Validation of status and book receiever
         if issued_to == None and status == 'o':
             raise ValidationError(_('Invalid:Status can\'t be on loan. Issued to field is empty.'))
+        if issued_to != None and status != 'o':
+            raise ValidationError(_('Book can\'t be issued if the status is not on loan.'))
             
     

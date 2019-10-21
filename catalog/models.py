@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.contrib.auth.models import User
 
 
@@ -41,9 +42,6 @@ class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
     author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='books')
-    summary = models.TextField(max_length=500, 
-                               help_text="Enter a brief description", 
-                               null=True, blank= True,)
     isbn = models.CharField('ISBN', 
                             max_length=13, 
                             help_text='13 Character <a href="https://www.isbn-'
@@ -72,7 +70,7 @@ class Book(models.Model):
 
 class BookInstance(models.Model):
      """ Model representing a specific copy of book that can be borrowed """
-     id = models.CharField(primary_key=True, 
+     uid = models.CharField(unique=True, 
                            max_length=250,
                            help_text='Unique id across whole library for this book.')
      book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='copies')
@@ -85,7 +83,6 @@ class BookInstance(models.Model):
          ('o', 'On Loan'),
          ('a', 'Available'),
          ('r', 'Reserved'),
-         ('l', 'Lost'),
          ('d', 'Due'),
      )
      status = models.CharField(
@@ -104,7 +101,10 @@ class BookInstance(models.Model):
         """ String representation for the model object. """
         return f'{self.book.title} {str(self.id)[:15]}'
 
-
-
-
+     def update_status(self):
+         """ Checks if a book is due for more than 15 days and marks it due. """
+         if (timezone.datetime.today() - timezone.datetime(self.due_back.year, self.due_back.month, self.due_back.day)).days >= 15:
+             print('This copy is due for return.')
+             self.status = 'd'
+             self.save()
     
