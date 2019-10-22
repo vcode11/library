@@ -4,7 +4,11 @@ from .models import Author, Genre, Book, BookInstance, Shelf, Student
 from django.core.exceptions import ValidationError
 from .forms import BookInstanceAdminForm
 admin.site.register(Shelf)
-admin.site.register(Student)
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('get_username', 'get_user_email', )
+    readonly_fields = ('user', )
+
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name')

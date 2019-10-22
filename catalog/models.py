@@ -19,6 +19,19 @@ class Student(models.Model):
     def __str__(self):
         return self.user.username
 
+    def get_username(self):
+        return self.user.username
+
+    def get_user_email(self):
+        return self.user.email
+    
+    def get_book_list(self):
+        return '\n'.join([book.book.title for book in self.books.all()])
+
+    get_username.short_description = 'Username'
+    get_user_email.short_description = 'Email ID'
+
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_profile_for_new_user(sender, created, instance, **kwargs):
     if created:
@@ -62,7 +75,7 @@ class Author(models.Model):
 class Book(models.Model):
     """ Model representing a book but not a specific copy of book. """
     title = models.CharField(max_length=200)
-    author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='books')
+    author  = models.ManyToManyField(Author, help_text='Add a author', blank=True, related_name='copies')
     isbn = models.CharField('ISBN', 
                             max_length=13, 
                             help_text='13 Character <a href="https://www.isbn-'
