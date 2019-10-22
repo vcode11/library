@@ -1,8 +1,29 @@
 #-*- coding: utf-8 -*-
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
+# signal for student
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
+class Student(models.Model):
+    """ A model for storing student related data OneToOne with user model."""
+    user = models.OneToOneField(
+                    settings.AUTH_USER_MODEL,
+                    on_delete=models.CASCADE,
+                    related_name="profile",
+                    verbose_name="user",)
+    
+    def __str__(self):
+        return self.user.username
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_profile_for_new_user(sender, created, instance, **kwargs):
+    if created:
+        profile = Student(user=instance)
+        profile.save()
 
 
 class Shelf(models.Model):
@@ -76,7 +97,7 @@ class BookInstance(models.Model):
      book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='copies')
      due_back = models.DateField(null=True, blank=True,)
      shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
-     issued_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
+     issued_to = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
           
      LOAN_STATUS = (
          ('m', 'Maintenance'),
@@ -98,7 +119,7 @@ class BookInstance(models.Model):
          verbose_name = 'Copy'
     
      def __str__(self):
-        """ String representation for the model object. """
+        """ String representation for model object. """
         return f'{self.book.title} {str(self.id)[:15]}'
 
      def update_status(self):

@@ -1,9 +1,10 @@
 #-*- coding: utf-8 -*-
 from django.contrib import admin
-from .models import Author, Genre, Book, BookInstance, Shelf
+from .models import Author, Genre, Book, BookInstance, Shelf, Student
 from django.core.exceptions import ValidationError
 from .forms import BookInstanceAdminForm
 admin.site.register(Shelf)
+admin.site.register(Student)
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name')
