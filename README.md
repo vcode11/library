@@ -10,6 +10,7 @@ A library site made using django backend.
    pip3 install -r requirements.txt
    python manage.py makemigrations
    python manage.py migrate
+   python manage.py createsuperuser
    python manage.py runserver
 ```
 ### To run the  backend server:
