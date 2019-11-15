@@ -9,11 +9,5 @@ admin.site.index_title = "Welcome to IIIT-L Library"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('catalog/',include('catalog.urls')),
-]
-
-# To redirect to base urls of our application
-from django.views.generic import RedirectView 
-urlpatterns += [
-    path('', RedirectView.as_view(url = '/catalog/'))
+    path('',include('catalog.urls')),
 ]
