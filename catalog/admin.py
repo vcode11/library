@@ -1,14 +1,9 @@
 #-*- coding: utf-8 -*-
 from django.contrib import admin
-from .models import Author, Genre, Book, BookInstance, Shelf, Student
+from .models import Author, Genre, Book, BookInstance, Shelf
 from django.core.exceptions import ValidationError
 from .forms import BookInstanceAdminForm
 admin.site.register(Shelf)
-@admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('get_username', 'get_user_email', )
-    readonly_fields = ('user', )
-
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('first_name', 'last_name')
@@ -31,6 +26,6 @@ class BookAdmin(admin.ModelAdmin):
 @admin.register(BookInstance)
 class BookInstanceAdmin(admin.ModelAdmin):
     form = BookInstanceAdminForm
-    list_display = ('book', 'status', 'due_back')
-    list_filter = ('status', 'due_back')
+    list_display = ('book', 'status', 'issued_on')
+    list_filter = ('status', 'issued_on')
     search_fields = ('book', 'id')

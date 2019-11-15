@@ -4,39 +4,6 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from django.contrib.auth.models import User
-# signal for student
-from django.dispatch import receiver
-from django.db.models.signals import post_save
-
-class Student(models.Model):
-    """ A model for storing student related data OneToOne with user model."""
-    user = models.OneToOneField(
-                    settings.AUTH_USER_MODEL,
-                    on_delete=models.CASCADE,
-                    related_name="profile",
-                    verbose_name="user",)
-    
-    def __str__(self):
-        return self.user.username
-
-    def get_username(self):
-        return self.user.username
-
-    def get_user_email(self):
-        return self.user.email
-    
-    def get_book_list(self):
-        return '\n'.join([book.book.title for book in self.books.all()])
-
-    get_username.short_description = 'Username'
-    get_user_email.short_description = 'Email ID'
-
-
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_profile_for_new_user(sender, created, instance, **kwargs):
-    if created:
-        profile = Student(user=instance)
-        profile.save()
 
 
 class Shelf(models.Model):
@@ -108,9 +75,9 @@ class BookInstance(models.Model):
                            max_length=250,
                            help_text='Unique id across whole library for this book.')
      book = models.ForeignKey(Book, on_delete=models.CASCADE, null=True, related_name='copies')
-     due_back = models.DateField(null=True, blank=True,)
+     issued_on = models.DateField(null=True, blank=True,)
      shelf = models.ForeignKey(Shelf, on_delete=models.SET_NULL, null=True, blank=True)
-     issued_to = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
+     issued_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='books')
           
      LOAN_STATUS = (
          ('m', 'Maintenance'),
@@ -127,7 +94,7 @@ class BookInstance(models.Model):
          help_text='Book Availability',
      )
      class Meta:
-         ordering =['due_back']
+         ordering =['issued_on']
          verbose_name_plural = 'Book Copies'
          verbose_name = 'Copy'
     
@@ -137,7 +104,7 @@ class BookInstance(models.Model):
 
      def update_status(self):
          """ Checks if a book is due for more than 15 days and marks it due. """
-         if (timezone.datetime.today() - timezone.datetime(self.due_back.year, self.due_back.month, self.due_back.day)).days >= 15:
+         if (timezone.datetime.today() - timezone.datetime(self.issued_on.year, self.issued_on.month, self.issued_on.day)).days >= 15:
              print('This copy is due for return.')
              self.status = 'd'
              self.save()
