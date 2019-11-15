@@ -81,7 +81,7 @@ class Book(models.Model):
                             help_text='13 Character <a href="https://www.isbn-'
                                       'international.org/content/what-isbn">ISBN number</a>',
                             null=True, blank=True)
-    genre = models.ManyToManyField(Genre, help_text='Choose a genre for this book.',related_name='books')
+    genre = models.ManyToManyField(Genre, blank=True, help_text='Choose a genre for this book.',related_name='books')
     
     def __str__(self):
         """ String representation of model book """
